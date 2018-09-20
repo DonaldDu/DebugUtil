@@ -8,7 +8,10 @@ import com.dhy.retrofitrxutil.ObserverX
 import com.dhy.xintent.XCommon
 import com.dhy.xintent.interfaces.Callback
 
-abstract class TestServerUtil(context: Context, api: TestConfigApi, TEST_CONFIG_TOKEN: String) : TestConfigUtil<TestServer>(context, api, TEST_CONFIG_TOKEN, Setting.testServer, TestServer::class.java) {
+abstract class TestServerUtil(context: Context,
+                              api: TestConfigApi,
+                              TEST_CONFIG_TOKEN: String,
+                              private val sqlId: String = "5ba30ef37f6fd3005b544488") : TestConfigUtil<TestServer>(context, api, TEST_CONFIG_TOKEN, Setting.testServer, TestServer::class.java) {
 
     override fun getConfigClass(): Class<TestServer> {
         return TestServer::class.java
@@ -21,7 +24,7 @@ abstract class TestServerUtil(context: Context, api: TestConfigApi, TEST_CONFIG_
 
     override fun refreshDatas(context: Context, api: TestConfigApi, token: String, callback: Callback<List<TestServer>?>) {
         val data = ConfigRequestData(context.packageName)
-        val request = ConfigRequest(context.packageName, token, "5ba30ef37f6fd3005b544488", data)
+        val request = ConfigRequest(context.packageName, token, sqlId, data)
         api.fetchTestServers(request)
                 .subscribe(object : ObserverX<ConfigResponse<TestServer>>(context) {
                     override fun onResponse(response: ConfigResponse<TestServer>) {
