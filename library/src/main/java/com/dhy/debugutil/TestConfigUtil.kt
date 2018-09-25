@@ -3,6 +3,8 @@ package com.dhy.debugutil
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.content.pm.PackageManager
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
@@ -10,6 +12,7 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
 import com.dhy.debugutil.data.Setting
+import com.dhy.xintent.XCommon
 import com.dhy.xintent.interfaces.Callback
 import com.dhy.xintent.preferences.XPreferences
 import java.util.*
@@ -25,9 +28,12 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
     private lateinit var listView: ListView
     private val itemLayoutId = android.R.layout.simple_list_item_1
     private val isTestUser = KEY_SETTING == Setting.testUser
+    private fun isStatic(): Boolean {
+        return XCommon.checkSelfPermission(context, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
+    }
 
     init {
-        configs = XPreferences.getList(context, KEY_SETTING, configClass)
+        configs = XPreferences.getList(context, KEY_SETTING, isStatic(), configClass)
     }
 
     protected abstract fun getConfigClass(): Class<CONFIG>
@@ -60,7 +66,7 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
 
     private fun onGetDatas(configs: List<CONFIG>) {
         this.configs = configs
-        XPreferences.set(context, KEY_SETTING, configs)
+        XPreferences.set(context, KEY_SETTING, isStatic(), configs)
         updateListView()
     }
 
