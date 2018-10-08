@@ -29,7 +29,8 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
     private val itemLayoutId = android.R.layout.simple_list_item_1
     private val isTestUser = KEY_SETTING == Setting.testUser
     private fun isStatic(): Boolean {
-        return XCommon.checkSelfPermission(context, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
+//        return XCommon.checkSelfPermission(context, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        return false
     }
 
     init {
