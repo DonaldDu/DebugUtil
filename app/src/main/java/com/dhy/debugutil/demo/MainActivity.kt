@@ -14,12 +14,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         api = ApiHolderUtil().createHolderApi(ApiHolder::class.java)
-        buttonServer.setOnClickListener {
-
-        }
 
         val user = TestUserUtil(this, api, null, "")
         user.initOnViewLongClick(buttonUser)
+        buttonUser.setOnClickListener {
+            user.show()
+        }
 
         val server = object : TestServerUtil(this, api, "") {
             override fun onConfigSelected(config: TestServer) {
@@ -27,5 +27,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         server.initOnViewLongClick(buttonServer)
+        buttonServer.setOnClickListener {
+            server.show()
+        }
     }
 }
