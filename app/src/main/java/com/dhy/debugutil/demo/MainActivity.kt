@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        api = ApiHolderUtil().createHolderApi(ApiHolder::class.java)
+        api = ApiHolderUtil(ApiHolder::class).api
 
         val user = TestUserUtil(this, api, null, "")
         user.initOnViewLongClick(buttonUser)
