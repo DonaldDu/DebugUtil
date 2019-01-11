@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.EditText
 import com.dhy.debugutil.data.*
 import com.dhy.retrofitrxutil.ObserverX
+import com.dhy.retrofitrxutil.subscribeX
 import com.dhy.xintent.interfaces.Callback
 
 class TestUserUtil(context: Context, api: TestConfigApi,
@@ -23,10 +24,8 @@ class TestUserUtil(context: Context, api: TestConfigApi,
         val data = ConfigRequestData(context.packageName)
         val req = ConfigRequest(context.packageName, token, sqlId, data)
         api.fetchTestUsers(req)
-                .subscribe(object : ObserverX<ConfigResponse<TestUser>>(context) {
-                    override fun onResponse(response: ConfigResponse<TestUser>) {
-                        callback.onCallback(response.configs)
-                    }
-                })
+                .subscribeX(context) {
+                    callback.onCallback(it.configs)
+                }
     }
 }

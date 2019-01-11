@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.TextView
 import com.dhy.debugutil.data.*
 import com.dhy.retrofitrxutil.ObserverX
+import com.dhy.retrofitrxutil.subscribeX
 import com.dhy.xintent.XCommon
 import com.dhy.xintent.interfaces.Callback
 
@@ -26,10 +27,8 @@ abstract class TestServerUtil(context: Context,
         val data = ConfigRequestData(context.packageName)
         val request = ConfigRequest(context.packageName, token, sqlId, data)
         api.fetchTestServers(request)
-                .subscribe(object : ObserverX<ConfigResponse<TestServer>>(context) {
-                    override fun onResponse(response: ConfigResponse<TestServer>) {
-                        callback.onCallback(response.configs)
-                    }
-                })
+                .subscribeX(context) {
+                    callback.onCallback(it.configs)
+                }
     }
 }
