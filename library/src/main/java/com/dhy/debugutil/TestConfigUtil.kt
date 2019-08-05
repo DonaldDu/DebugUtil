@@ -39,7 +39,7 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
         }
     }
 
-    private fun show() {
+    fun show() {
         dialog = Dialog(context)
         listView = ListView(context)
         dialog.setContentView(listView)

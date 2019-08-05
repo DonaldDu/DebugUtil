@@ -23,12 +23,17 @@ class MainActivity : AppCompatActivity() {
 
         val user = TestUserUtil(this, api, null)
         user.initOnViewLongClick(buttonUser)
-
+        buttonUser.setOnClickListener {
+            user.show()
+        }
         val server = object : TestServerUtil(this, api) {
             override fun onConfigSelected(config: TestServer) {
 
             }
         }
         server.initOnViewLongClick(buttonServer)
+        buttonServer.setOnClickListener {
+            server.show()
+        }
     }
 }
