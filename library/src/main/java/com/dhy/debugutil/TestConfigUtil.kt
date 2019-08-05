@@ -3,23 +3,16 @@ package com.dhy.debugutil
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.content.pm.PackageManager
-import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import com.dhy.debugutil.data.Setting
-import com.dhy.xintent.XCommon
 import com.dhy.xintent.interfaces.Callback
 import com.dhy.xintent.preferences.XPreferences
 import java.util.*
 
 abstract class TestConfigUtil<CONFIG>(private val context: Context,
                                       private val api: TestConfigApi,
-                                      private val TEST_CONFIG_TOKEN: String,
                                       private val KEY_SETTING: Setting,
                                       configClass: Class<CONFIG>) : AdapterView.OnItemClickListener {
 
@@ -29,7 +22,6 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
     private val itemLayoutId = android.R.layout.simple_list_item_1
     private val isTestUser = KEY_SETTING == Setting.testUser
     private fun isStatic(): Boolean {
-//        return XCommon.checkSelfPermission(context, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
         return false
     }
 
@@ -73,7 +65,7 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
         if (position == parent.adapter.count - 1) {//last item: refresh datas
-            refreshDatas(context, api, TEST_CONFIG_TOKEN, Callback { result ->
+            refreshDatas(context, api, getLcId(context), getLcKey(context), Callback { result ->
                 if (result != null) onGetDatas(result)
                 else {
                     val msg = if (isTestUser) "测试用户" else "测试服务器地址"
@@ -91,9 +83,27 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
 
     protected abstract fun onConfigSelected(config: CONFIG)
 
-    protected abstract fun refreshDatas(context: Context, api: TestConfigApi, token: String, callback: Callback<List<CONFIG>?>)
+    protected abstract fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<CONFIG>?>)
 
     private fun dismissDialog() {
         if (dialog.isShowing) dialog.dismiss()
+    }
+
+    private fun getBuildConfig(context: Context, name: String): String {
+        val bc = "${context.packageName}.BuildConfig"
+        return try {
+            Class.forName(bc).getDeclaredField(name).get(null) as String
+        } catch (e: Exception) {
+            Toast.makeText(context, "Please define '$name' in $bc", Toast.LENGTH_LONG).show()
+            ""
+        }
+    }
+
+    private fun getLcId(context: Context): String {
+        return getBuildConfig(context, "X_LC_ID")
+    }
+
+    private fun getLcKey(context: Context): String {
+        return getBuildConfig(context, "X_LC_KEY")
     }
 }

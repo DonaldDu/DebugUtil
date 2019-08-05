@@ -6,6 +6,7 @@ import com.dhy.apiholder.ApiHolderUtil
 import com.dhy.debugutil.TestServerUtil
 import com.dhy.debugutil.TestUserUtil
 import com.dhy.debugutil.data.TestServer
+import com.dhy.retrofitrxutil.ObserverX
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -13,15 +14,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        api = ApiHolderUtil().createHolderApi(ApiHolder::class.java)
+        ObserverX.setDefaultStyledProgressGenerator(MyStyledProgressGenerator())
+        ObserverX.setDefaultErrorHandler(MyNetErrorHandler())
+        api = ApiHolderUtil(ApiHolder::class).api
         buttonServer.setOnClickListener {
 
         }
 
-        val user = TestUserUtil(this, api, null, "")
+        val user = TestUserUtil(this, api, null)
         user.initOnViewLongClick(buttonUser)
 
-        val server = object : TestServerUtil(this, api, "") {
+        val server = object : TestServerUtil(this, api) {
             override fun onConfigSelected(config: TestServer) {
 
             }
