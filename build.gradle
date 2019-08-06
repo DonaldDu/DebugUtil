@@ -28,6 +28,27 @@ allprojects {
     }
 }
 
+subprojects {
+    project.ext {
+        INIT_X_LC_ID_KEY = {
+            buildTypes {
+                release {
+                    buildConfigField "String", "X_LC_ID", "\"\""
+                    buildConfigField "String", "X_LC_KEY", "\"\""
+                }
+                debug {
+                    if (project.hasProperty('XLOG_MASTER_KEY')) {
+                        buildConfigField "String", "X_LC_ID", "\"$XLOG_APP_ID\""
+                        buildConfigField "String", "X_LC_KEY", "\"$XLOG_MASTER_KEY\""
+                    } else {
+                        buildConfigField "String", "X_LC_ID", "\"\""
+                        buildConfigField "String", "X_LC_KEY", "\"\""
+                    }
+                }
+            }
+        }
+    }
+}
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

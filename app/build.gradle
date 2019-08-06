@@ -11,19 +11,17 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        packagingOptions {
+            exclude 'META-INF/**.kotlin_module'
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug {
-            if (project.hasProperty('XLOG_MASTER_KEY')) {
-                buildConfigField "String", "X_LC_ID", "\"$XLOG_APP_ID\""
-                buildConfigField "String", "X_LC_KEY", "\"$XLOG_MASTER_KEY\""
-            }
-        }
     }
+    android.with(INIT_X_LC_ID_KEY)
 }
 
 dependencies {

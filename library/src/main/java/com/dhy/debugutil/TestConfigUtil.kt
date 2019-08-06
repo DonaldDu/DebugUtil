@@ -5,32 +5,38 @@ import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
-import com.dhy.debugutil.data.Setting
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.TextView
+import com.dhy.debugutil.data.ConfigRequest
+import com.dhy.debugutil.data.ConfigResponse
+import com.dhy.debugutil.data.TestConfig
+import com.dhy.debugutil.data.TestConfigSetting
+import com.dhy.retrofitrxutil.ObserverX
 import com.dhy.xintent.interfaces.Callback
-import com.dhy.xintent.preferences.XPreferences
-import java.util.*
+import com.dhy.xpreference.XPreferences
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
-abstract class TestConfigUtil<CONFIG>(private val context: Context,
-                                      private val api: TestConfigApi,
-                                      private val KEY_SETTING: Setting,
-                                      configClass: Class<CONFIG>) : AdapterView.OnItemClickListener {
+abstract class TestConfigUtil(private val context: Context,
+                              private val api: TestConfigApi,
+                              private val lcId: String,
+                              private val lcKey: String,
+                              private val configName: String) : AdapterView.OnItemClickListener {
 
-    private var configs: List<CONFIG>? = null
+    private var configs: List<TestConfig>
+    private var testConfigSetting: TestConfigSetting = XPreferences.get(context)
+            ?: TestConfigSetting()
     private lateinit var dialog: Dialog
     private lateinit var listView: ListView
     private val itemLayoutId = android.R.layout.simple_list_item_1
-    private val isTestUser = KEY_SETTING == Setting.testUser
-    private fun isStatic(): Boolean {
-        return false
-    }
+    private val isTestUser = configName == "TestUsers"
 
     init {
-        configs = XPreferences.getList(context, KEY_SETTING, isStatic(), configClass)
+        configs = testConfigSetting.datas[configName] ?: emptyList()
+        testConfigSetting.datas[configName] = configs
     }
-
-    protected abstract fun getConfigClass(): Class<CONFIG>
-
 
     fun initOnViewLongClick(view: View) {
         view.setOnLongClickListener {
@@ -53,19 +59,19 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
     }
 
     private fun updateListView() {
-        if (configs == null) configs = ArrayList()
-        listView.adapter = ArrayAdapter(context, itemLayoutId, configs!!)
+        listView.adapter = ArrayAdapter(context, itemLayoutId, configs)
     }
 
-    private fun onGetDatas(configs: List<CONFIG>) {
+    private fun onGetDatas(configs: List<TestConfig>) {
         this.configs = configs
-        XPreferences.set(context, KEY_SETTING, isStatic(), configs)
+        testConfigSetting.datas[configName] = configs
+        XPreferences.put(context, testConfigSetting)
         updateListView()
     }
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
         if (position == parent.adapter.count - 1) {//last item: refresh datas
-            refreshDatas(context, api, getLcId(context), getLcKey(context), Callback { result ->
+            refreshDatas(context, api, lcId, lcKey, Callback { result ->
                 if (result != null) onGetDatas(result)
                 else {
                     val msg = if (isTestUser) "测试用户" else "测试服务器地址"
@@ -76,34 +82,26 @@ abstract class TestConfigUtil<CONFIG>(private val context: Context,
                 }
             })
         } else {//use current user
-            onConfigSelected(configs!![position])
+            onConfigSelected(configs[position])
             dismissDialog()
         }
     }
 
-    protected abstract fun onConfigSelected(config: CONFIG)
+    protected abstract fun onConfigSelected(config: TestConfig)
 
-    protected abstract fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<CONFIG>?>)
+    private fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<TestConfig>?>) {
+        val request = ConfigRequest(context.packageName, configName)
+        api.fetchTestConfigs(lcId, lcKey, request)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : ObserverX<ConfigResponse>(context) {
+                    override fun onResponse(response: ConfigResponse) {
+                        callback.onCallback(response.configs)
+                    }
+                })
+    }
 
     private fun dismissDialog() {
         if (dialog.isShowing) dialog.dismiss()
-    }
-
-    private fun getBuildConfig(context: Context, name: String): String {
-        val bc = "${context.packageName}.BuildConfig"
-        return try {
-            Class.forName(bc).getDeclaredField(name).get(null) as String
-        } catch (e: Exception) {
-            Toast.makeText(context, "Please define '$name' in $bc", Toast.LENGTH_LONG).show()
-            ""
-        }
-    }
-
-    private fun getLcId(context: Context): String {
-        return getBuildConfig(context, "X_LC_ID")
-    }
-
-    private fun getLcKey(context: Context): String {
-        return getBuildConfig(context, "X_LC_KEY")
     }
 }
