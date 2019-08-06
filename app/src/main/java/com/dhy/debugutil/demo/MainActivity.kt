@@ -3,6 +3,7 @@ package com.dhy.debugutil.demo
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.dhy.apiholder.ApiHolderUtil
+import com.dhy.debugutil.TestConfigUtil
 import com.dhy.debugutil.TestServerUtil
 import com.dhy.debugutil.TestUserUtil
 import com.dhy.debugutil.data.TestConfig
@@ -20,13 +21,14 @@ class MainActivity : AppCompatActivity() {
         buttonServer.setOnClickListener {
 
         }
-
-        val user = TestUserUtil(this, api, null, BuildConfig.X_LC_ID, BuildConfig.X_LC_KEY)
+        val context = this
+        TestConfigUtil.appBuildConfigClassName = BuildConfig::class.java.name
+        val user = TestUserUtil(context, api, null)
         user.initOnViewLongClick(buttonUser)
         buttonUser.setOnClickListener {
             user.show()
         }
-        val server = object : TestServerUtil(this, api, BuildConfig.X_LC_ID, BuildConfig.X_LC_KEY) {
+        val server = object : TestServerUtil(context, api) {
             override fun onConfigSelected(config: TestConfig) {
 
             }

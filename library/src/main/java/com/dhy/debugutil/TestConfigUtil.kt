@@ -5,10 +5,7 @@ import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import com.dhy.debugutil.data.ConfigRequest
 import com.dhy.debugutil.data.ConfigResponse
 import com.dhy.debugutil.data.TestConfig
@@ -21,8 +18,6 @@ import io.reactivex.schedulers.Schedulers
 
 abstract class TestConfigUtil(private val context: Context,
                               private val api: TestConfigApi,
-                              private val lcId: String,
-                              private val lcKey: String,
                               private val configName: String) : AdapterView.OnItemClickListener {
 
     private var configs: List<TestConfig>
@@ -71,7 +66,7 @@ abstract class TestConfigUtil(private val context: Context,
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
         if (position == parent.adapter.count - 1) {//last item: refresh datas
-            refreshDatas(context, api, lcId, lcKey, Callback { result ->
+            refreshDatas(context, api, getLcId(), getLcKey(), Callback { result ->
                 if (result != null) onGetDatas(result)
                 else {
                     val msg = if (isTestUser) "测试用户" else "测试服务器地址"
@@ -87,7 +82,7 @@ abstract class TestConfigUtil(private val context: Context,
         }
     }
 
-    protected abstract fun onConfigSelected(config: TestConfig)
+    protected open fun onConfigSelected(config: TestConfig) {}
 
     private fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<TestConfig>?>) {
         val request = ConfigRequest(context.packageName, configName)
@@ -103,5 +98,35 @@ abstract class TestConfigUtil(private val context: Context,
 
     private fun dismissDialog() {
         if (dialog.isShowing) dialog.dismiss()
+    }
+
+    private fun getBuildConfig(context: Context, name: String): String {
+        return try {
+            if (appBuildConfigClassName.isEmpty()) appBuildConfigClassName = "${context.packageName}.BuildConfig"
+            Class.forName(appBuildConfigClassName).getDeclaredField(name).get(null) as String
+        } catch (e: Exception) {
+            val msg: String = if (e is ClassNotFoundException) {
+                "Please init TestConfigUtil.appBuildConfigClassName"
+            } else {
+                "Please define '$name' in appBuildConfig"
+            }
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+            ""
+        }
+    }
+
+    private fun getLcId(): String {
+        return getBuildConfig(context, "X_LC_ID")
+    }
+
+    private fun getLcKey(): String {
+        return getBuildConfig(context, "X_LC_KEY")
+    }
+
+    companion object {
+        /**
+         * if not set use "${context.packageName}.BuildConfig" for default
+         * */
+        var appBuildConfigClassName = ""
     }
 }
