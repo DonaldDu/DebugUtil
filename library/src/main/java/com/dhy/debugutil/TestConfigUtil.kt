@@ -22,7 +22,6 @@ abstract class TestConfigUtil(private val context: Context,
 
     private var configs: List<TestConfig>
     private var testConfigSetting: TestConfigSetting = XPreferences.get(context)
-            ?: TestConfigSetting()
     private lateinit var dialog: Dialog
     private lateinit var listView: ListView
     private val itemLayoutId = android.R.layout.simple_list_item_1
