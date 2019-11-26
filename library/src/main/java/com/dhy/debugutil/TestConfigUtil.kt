@@ -45,7 +45,7 @@ abstract class TestConfigUtil(private val context: Context,
         dialog.setContentView(listView)
         val footer = LayoutInflater.from(context).inflate(itemLayoutId, null) as TextView
         val type = if (isTestUser) "测试用户" else "测试服务器地址"
-        footer.text = String.format("点击更新【%s】数据", type)
+        footer.text = String.format("更新【%s】数据", type)
         listView.addFooterView(footer, null, true)
         listView.onItemClickListener = this
         updateListView()

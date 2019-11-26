@@ -51,7 +51,7 @@ class MyNetErrorHandler : BaseErrorHandler() {
     }
 
     private fun parseHttpError(e: HttpException): Error {
-        val json = e.response().errorBody()?.string()
+        val json = e.response()?.errorBody()?.string()
         val code = e.code()
         var message = if (json?.startsWith("{") == true) {
             JSONObject(json).optString("msg")
