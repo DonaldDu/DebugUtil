@@ -99,27 +99,12 @@ abstract class TestConfigUtil(private val context: Context,
         if (dialog.isShowing) dialog.dismiss()
     }
 
-    private fun getBuildConfig(context: Context, name: String): String {
-        return try {
-            if (appBuildConfigClassName.isEmpty()) appBuildConfigClassName = "${context.packageName}.BuildConfig"
-            Class.forName(appBuildConfigClassName).getDeclaredField(name).get(null) as String
-        } catch (e: Exception) {
-            val msg: String = if (e is ClassNotFoundException) {
-                "Please init TestConfigUtil.appBuildConfigClassName"
-            } else {
-                "Please define '$name' in appBuildConfig"
-            }
-            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-            ""
-        }
-    }
-
     private fun getLcId(): String {
-        return getBuildConfig(context, "X_LC_ID")
+        return context.getString(R.string.X_LC_ID)
     }
 
     private fun getLcKey(): String {
-        return getBuildConfig(context, "X_LC_KEY")
+        return context.getString(R.string.X_LC_KEY)
     }
 
     companion object {
