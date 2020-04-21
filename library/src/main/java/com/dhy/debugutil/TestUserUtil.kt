@@ -7,6 +7,6 @@ import com.dhy.debugutil.data.RemoteConfig
 open class TestUserUtil(context: Context, api: TestConfigApi, private val userEt: EditText?) : TestConfigUtil(context, api, "TestUsers") {
 
     override fun onConfigSelected(config: RemoteConfig) {
-        userEt?.setText(config.getValue())
+        userEt?.setText(config.values.first())
     }
 }

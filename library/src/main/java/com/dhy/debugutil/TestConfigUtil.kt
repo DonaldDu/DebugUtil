@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.*
 import com.dhy.debugutil.data.*
 import com.dhy.retrofitrxutil.ObserverX
-import com.dhy.xintent.interfaces.Callback
 import com.dhy.xpreference.XPreferences
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -67,39 +66,50 @@ abstract class TestConfigUtil(private val context: Context,
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
         if (position == parent.adapter.count - 1) {//last item: refresh datas
-            refreshDatas(context, api, getLcId(), getLcKey(), Callback { result ->
-                if (result != null) onGetDatas(result)
-                else {
-                    val msg = if (isTestUser) "测试用户" else "测试服务器地址"
-                    AlertDialog.Builder(context)
-                            .setMessage("获取${msg}数据失败")
-                            .setNegativeButton("关闭", null)
-                            .setPositiveButton("创建默认数据") { _, _ ->
-                                if (configClass != null) {
-                                    createConfigs(configClass!!) {
-                                        val tip = if (it.isSuccess) "创建数据成功" else it.error
-                                        Toast.makeText(context, tip, Toast.LENGTH_LONG).show()
-                                    }
-                                } else Toast.makeText(context, "请设置 configClass", Toast.LENGTH_LONG).show()
-                            }.show()
-                }
-            })
+            refreshDatas()
         } else {//use current user
             onConfigSelected(configs[position])
             dismissDialog()
         }
     }
 
+    private fun refreshDatas() {
+        refreshDatas(context, api, getLcId(), getLcKey(), refreshDatasCallback)
+    }
+
+    private val refreshDatasCallback: (List<RemoteConfig>?) -> Unit = { result ->
+        if (result != null) onGetDatas(result)
+        else {
+            val msg = if (isTestUser) "测试用户" else "测试服务器地址"
+            AlertDialog.Builder(context)
+                    .setMessage("获取${msg}数据失败")
+                    .setNegativeButton("关闭", null)
+                    .setPositiveButton("创建默认数据") { _, _ ->
+                        createConfigs()
+                    }.show()
+        }
+    }
+
+    private fun createConfigs() {
+        if (configClass != null) {
+            createConfigs(configClass!!) {
+                if (it.isSuccess) refreshDatas()
+                val tip = if (it.isSuccess) "创建数据成功" else it.error
+                Toast.makeText(context, tip, Toast.LENGTH_LONG).show()
+            }
+        } else Toast.makeText(context, "请设置 configClass", Toast.LENGTH_LONG).show()
+    }
+
     protected open fun onConfigSelected(config: RemoteConfig) {}
 
-    private fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<RemoteConfig>?>) {
-        val request = ConfigRequest(context.packageName, configName)
+    private fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: (List<RemoteConfig>?) -> Unit) {
+        val request = FetchConfigRequest(context.packageName, configName)
         api.fetchTestConfigs(lcId, lcKey, request)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : ObserverX<ConfigResponse>(context) {
                     override fun onResponse(response: ConfigResponse) {
-                        callback.onCallback(response.configs)
+                        callback(response.configs)
                     }
                 })
     }
@@ -107,7 +117,7 @@ abstract class TestConfigUtil(private val context: Context,
     private fun createConfigs(configClass: Class<*>, callback: (LCResponse) -> Unit) {
         val lcId = getLcId()
         val lcKey = getLcKey()
-        val request = ConfigRequest(context.packageName, configName)
+        val request = CreateConfigRequest(context.packageName, configName)
         request.data = RemoteConfig.getConfigs(configClass)
         api.createTestConfigs(lcId, lcKey, request).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

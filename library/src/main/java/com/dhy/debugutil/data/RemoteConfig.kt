@@ -6,14 +6,9 @@ import java.io.Serializable
 
 class RemoteConfig : Serializable {
     var name = ""
-    var servers: MutableList<String> = mutableListOf()
-    fun getValue(): String {
-        return servers.joinToString()
-    }
-
-    fun addServer(remark: String?, server: String) {
-        if (remark.isNullOrEmpty()) servers.add(server)
-        else servers.add("$remark@$server")
+    var values: MutableList<String> = mutableListOf()
+    fun add(name: String, value: String) {
+        values.add("$name@$value")
     }
 
     override fun toString(): String {
@@ -22,6 +17,13 @@ class RemoteConfig : Serializable {
 
     fun isRelease(): Boolean {
         return name.toLowerCase() == "release"
+    }
+
+    fun toConfigs(): List<Config> {
+        return values.map {
+            val kv = it.split("@")
+            Config(kv.first(), kv.last())
+        }
     }
 
     companion object {
@@ -36,10 +38,10 @@ class RemoteConfig : Serializable {
             configClass.declaredFields.forEach {
                 val config = it.getAnnotation(TestConfig::class.java)
                 if (config != null) {
-                    test.addServer(config.name, config.value)
+                    test.add(config.name, config.value)
 
                     it.isAccessible = true
-                    release.addServer(config.name, it.get(null).toString())
+                    release.add(config.name, it.get(null).toString())
                 }
             }
             return listOf(test, release)

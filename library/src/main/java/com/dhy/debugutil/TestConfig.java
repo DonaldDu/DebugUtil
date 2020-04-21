@@ -8,7 +8,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TestConfig {
-    String name() default "";
+    /**
+     * 不能为空
+     */
+    String name();
 
+    /**
+     * 不能为空
+     */
     String value();
 }
