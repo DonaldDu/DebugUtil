@@ -6,10 +6,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
-import com.dhy.debugutil.data.ConfigRequest
-import com.dhy.debugutil.data.ConfigResponse
-import com.dhy.debugutil.data.TestConfig
-import com.dhy.debugutil.data.TestConfigSetting
+import com.dhy.debugutil.data.*
 import com.dhy.retrofitrxutil.ObserverX
 import com.dhy.xintent.interfaces.Callback
 import com.dhy.xpreference.XPreferences
@@ -20,12 +17,17 @@ abstract class TestConfigUtil(private val context: Context,
                               private val api: TestConfigApi,
                               private val configName: String) : AdapterView.OnItemClickListener {
 
-    private var configs: List<TestConfig>
+    private var configs: List<RemoteConfig>
     private var testConfigSetting: TestConfigSetting = XPreferences.get(context)
     private lateinit var dialog: Dialog
     private lateinit var listView: ListView
     private val itemLayoutId = android.R.layout.simple_list_item_1
     private val isTestUser = configName == "TestUsers"
+    var configClass: Class<*>? = null
+
+    companion object {
+        var configFormatter: IConfigFormatter = object : IConfigFormatter {}
+    }
 
     init {
         configs = testConfigSetting.datas[configName] ?: emptyList()
@@ -56,7 +58,7 @@ abstract class TestConfigUtil(private val context: Context,
         listView.adapter = ArrayAdapter(context, itemLayoutId, configs)
     }
 
-    private fun onGetDatas(configs: List<TestConfig>) {
+    private fun onGetDatas(configs: List<RemoteConfig>) {
         this.configs = configs
         testConfigSetting.datas[configName] = configs
         XPreferences.put(context, testConfigSetting)
@@ -71,8 +73,15 @@ abstract class TestConfigUtil(private val context: Context,
                     val msg = if (isTestUser) "测试用户" else "测试服务器地址"
                     AlertDialog.Builder(context)
                             .setMessage("获取${msg}数据失败")
-                            .setPositiveButton("OK", null)
-                            .show()
+                            .setNegativeButton("关闭", null)
+                            .setPositiveButton("创建默认数据") { _, _ ->
+                                if (configClass != null) {
+                                    createConfigs(configClass!!) {
+                                        val tip = if (it.isSuccess) "创建数据成功" else it.error
+                                        Toast.makeText(context, tip, Toast.LENGTH_LONG).show()
+                                    }
+                                } else Toast.makeText(context, "请设置 configClass", Toast.LENGTH_LONG).show()
+                            }.show()
                 }
             })
         } else {//use current user
@@ -81,9 +90,9 @@ abstract class TestConfigUtil(private val context: Context,
         }
     }
 
-    protected open fun onConfigSelected(config: TestConfig) {}
+    protected open fun onConfigSelected(config: RemoteConfig) {}
 
-    private fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<TestConfig>?>) {
+    private fun refreshDatas(context: Context, api: TestConfigApi, lcId: String, lcKey: String, callback: Callback<List<RemoteConfig>?>) {
         val request = ConfigRequest(context.packageName, configName)
         api.fetchTestConfigs(lcId, lcKey, request)
                 .subscribeOn(Schedulers.io())
@@ -91,6 +100,20 @@ abstract class TestConfigUtil(private val context: Context,
                 .subscribe(object : ObserverX<ConfigResponse>(context) {
                     override fun onResponse(response: ConfigResponse) {
                         callback.onCallback(response.configs)
+                    }
+                })
+    }
+
+    private fun createConfigs(configClass: Class<*>, callback: (LCResponse) -> Unit) {
+        val lcId = getLcId()
+        val lcKey = getLcKey()
+        val request = ConfigRequest(context.packageName, configName)
+        request.data = RemoteConfig.getConfigs(configClass)
+        api.createTestConfigs(lcId, lcKey, request).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : ObserverX<LCResponse>(context) {
+                    override fun onResponse(response: LCResponse) {
+                        callback(response)
                     }
                 })
     }
@@ -105,12 +128,5 @@ abstract class TestConfigUtil(private val context: Context,
 
     private fun getLcKey(): String {
         return context.getString(R.string.X_LC_KEY)
-    }
-
-    companion object {
-        /**
-         * if not set use "${context.packageName}.BuildConfig" for default
-         * */
-        var appBuildConfigClassName = ""
     }
 }

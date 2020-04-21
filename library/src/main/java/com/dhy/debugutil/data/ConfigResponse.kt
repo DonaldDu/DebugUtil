@@ -5,10 +5,10 @@ import java.io.Serializable
 class ConfigResponse : Serializable {
     private val results: List<ConfigRecord>? = null
 
-    val configs: List<TestConfig>?
-        get() = if (results?.size == 1) results.first().json else null
+    val configs: List<RemoteConfig>?
+        get() = if (results?.size == 1) results.first().data else null
 
     private class ConfigRecord : Serializable {
-        internal var json: List<TestConfig>? = null
+        internal var data: List<RemoteConfig>? = null
     }
 }
