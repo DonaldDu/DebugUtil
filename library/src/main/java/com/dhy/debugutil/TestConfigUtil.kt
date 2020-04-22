@@ -54,6 +54,7 @@ abstract class TestConfigUtil(private val context: Context,
     }
 
     private fun updateListView() {
+        if (configs.isEmpty() && configClass != null) onGetDatas(RemoteConfig.getConfigs(configClass!!))
         listView.adapter = ArrayAdapter(context, itemLayoutId, configs)
     }
 
