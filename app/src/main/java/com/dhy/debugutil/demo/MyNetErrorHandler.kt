@@ -21,7 +21,7 @@ class MyNetErrorHandler : BaseErrorHandler() {
         return AlertDialog.Builder(context).setMessage(msg).show().apply { setCancelable(true) }
     }
 
-    override fun isAuthorizeFailed(activity: Activity, errorCode: Int): Boolean {
+    override fun isAuthorizeFailed(activity: Activity, error: IError): Boolean {
         return false
     }
 
@@ -50,7 +50,7 @@ class MyNetErrorHandler : BaseErrorHandler() {
         return true
     }
 
-    private fun parseHttpError(e: HttpException): Error {
+    private fun parseHttpError(e: HttpException): IError {
         val json = e.response()?.errorBody()?.string()
         val code = e.code()
         var message = if (json?.startsWith("{") == true) {
@@ -61,10 +61,12 @@ class MyNetErrorHandler : BaseErrorHandler() {
             message = SERVER_ERROR
             Log.d("ErrorHandler", json)
         }
-        return Error(code, message)
+        return Error(code, message, e.code())
     }
 
-    class Error(private val errorCode: Int, val msg: String) : IError {
+    class Error(private val errorCode: Int, val msg: String, private val httpCode: Int = 0) : IError {
+        override fun httpCode() = httpCode
+
         override fun getMessage(): String {
             return msg
         }
