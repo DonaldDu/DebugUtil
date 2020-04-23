@@ -11,8 +11,11 @@ open class TestServerUtil(context: Context, api: TestConfigApi, configClass: Cla
         this.configClass = configClass
     }
 
-    fun updateServerLabel(serverLabel: TextView, usingTestServer: RemoteConfig) {
-        serverLabel.visibility = View.VISIBLE
-        XCommon.setTextWithFormat(serverLabel, usingTestServer.toString())
+    companion object {
+        @JvmStatic
+        fun updateServerLabel(serverLabel: TextView, usingTestServer: RemoteConfig) {
+            serverLabel.visibility = View.VISIBLE
+            XCommon.setTextWithFormat(serverLabel, usingTestServer.toString())
+        }
     }
 }

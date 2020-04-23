@@ -19,11 +19,27 @@ class RemoteConfig : Serializable {
         return name.toLowerCase() == "release"
     }
 
-    fun toConfigs(): List<Config> {
+    private fun toConfigs(): List<Config> {
         return values.map {
             val kv = it.split("@")
             Config(kv.first(), kv.last())
         }
+    }
+
+    /**
+     * key:releaseValue,value:testValue
+     * */
+    fun toConfigs(configClass: Class<*>): List<Config> {
+        val servers = toConfigs()
+        configClass.declaredFields.forEach {
+            val testConfig = it.getAnnotation(TestConfig::class.java)
+            if (testConfig != null) {
+                if (!it.isAccessible) it.isAccessible = true
+                val server = servers.find { s -> s.name == testConfig.name }!!
+                server.defaultValue = it.get(null).toString()
+            }
+        }
+        return servers
     }
 
     companion object {
@@ -45,6 +61,11 @@ class RemoteConfig : Serializable {
                 }
             }
             return listOf(test, release)
+        }
+
+        @JvmStatic
+        fun getReleaseConfig(configClass: Class<*>): RemoteConfig {
+            return getConfigs(configClass).find { it.isRelease() }!!
         }
     }
 }
