@@ -1,2 +1,3 @@
 -keepclassmembers class * implements java.io.Serializable {<fields>;}
 -keep class com.dhy.debugutil.data.**
+-keepclassmembers class * implements com.dhy.debugutil.data.IConfig{*;}

@@ -5,6 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestConfigSetting implements Serializable {
+public class TestConfigSetting implements Serializable, IConfig {
     public final Map<String, List<RemoteConfig>> datas = new HashMap<>();
 }

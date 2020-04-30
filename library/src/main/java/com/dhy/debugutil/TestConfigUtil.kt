@@ -22,7 +22,7 @@ abstract class TestConfigUtil(private val context: Context,
     private lateinit var listView: ListView
     private val itemLayoutId = android.R.layout.simple_list_item_1
     private val isTestUser = configName == "TestUsers"
-    var configClass: Class<*>? = null
+    var configClass: Class<out IConfig>? = null
 
     companion object {
         var configFormatter: IConfigFormatter = object : IConfigFormatter {}
