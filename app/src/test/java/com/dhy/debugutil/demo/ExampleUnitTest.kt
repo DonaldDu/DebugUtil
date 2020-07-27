@@ -1,7 +1,5 @@
 package com.dhy.debugutil.demo
 
-import com.dhy.debugutil.data.RemoteConfig
-import com.google.gson.Gson
 import org.junit.Test
 
 /**
@@ -12,7 +10,6 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        val configs = RemoteConfig.getConfigs(Config::class.java)
-        println(Gson().toJson(configs))
+
     }
 }

@@ -1,7 +1,8 @@
 package com.dhy.debugutil.data
 
-import com.dhy.debugutil.TestConfig
+import android.content.Context
 import com.dhy.debugutil.TestConfigUtil
+import com.dhy.xpreference.XPreferences
 import java.io.Serializable
 
 class RemoteConfig : Serializable {
@@ -19,53 +20,51 @@ class RemoteConfig : Serializable {
         return name.toLowerCase() == "release"
     }
 
-    private fun toConfigs(): List<Config> {
+    fun toConfigs(): List<Config> {
         return values.map {
             val kv = it.split("@")
             Config(kv.first(), kv.last())
         }
     }
 
-    /**
-     * key:releaseValue,value:testValue
-     * */
-    fun toConfigs(configClass: Class<*>): List<Config> {
-        val servers = toConfigs()
-        configClass.declaredFields.forEach {
-            val testConfig = it.getAnnotation(TestConfig::class.java)
-            if (testConfig != null) {
-                if (!it.isAccessible) it.isAccessible = true
-                val server = servers.find { s -> s.name == testConfig.name }!!
-                server.defaultValue = it.get(null).toString()
-            }
+    fun updateServersMap(context: Context? = null) {
+        serversMap.clear()
+        values.forEach {
+            val kv = it.split("@")
+            serversMap[kv.first()] = kv.last()
         }
-        return servers
+        if (context != null) XPreferences.put(context, this)
     }
 
     companion object {
         @JvmStatic
-        fun getConfigs(configClass: Class<*>): List<RemoteConfig> {
-            val test = RemoteConfig().apply {
-                name = "Test"
-            }
-            val release = RemoteConfig().apply {
-                name = "Release"
-            }
-            configClass.declaredFields.forEach {
-                val config = it.getAnnotation(TestConfig::class.java)
-                if (config != null) {
-                    test.add(config.name, config.value)
+        lateinit var dynamicServers: List<IDynamicServer>
 
-                    it.isAccessible = true
-                    release.add(config.name, it.get(null).toString())
-                }
+        @JvmStatic
+        val serversMap: MutableMap<String, String> = mutableMapOf()
+
+        @JvmStatic
+        fun getConfigs(): List<RemoteConfig> {
+            val test = RemoteConfig().apply { name = "Test" }
+            val release = RemoteConfig().apply { name = "Release" }
+            dynamicServers.forEach {
+                test.add(it.name, it.test)
+                release.add(it.name, it.release)
             }
             return listOf(test, release)
         }
 
         @JvmStatic
-        fun getReleaseConfig(configClass: Class<*>): RemoteConfig {
-            return getConfigs(configClass).find { it.isRelease() }!!
+        fun getReleaseConfig(): RemoteConfig {
+            return getConfigs().find { it.isRelease() }!!
         }
     }
+}
+
+fun Context.getUsingTestServer(): RemoteConfig {
+    var testServer: RemoteConfig = XPreferences.get(this)
+    if (testServer.name.isEmpty()) {
+        testServer = RemoteConfig.getConfigs().find { it.isRelease() }!!
+    }
+    return testServer
 }

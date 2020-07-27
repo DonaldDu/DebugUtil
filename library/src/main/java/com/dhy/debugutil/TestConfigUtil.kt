@@ -22,7 +22,6 @@ abstract class TestConfigUtil(private val context: Context,
     private lateinit var listView: ListView
     private val itemLayoutId = android.R.layout.simple_list_item_1
     private val isTestUser = configName == "TestUsers"
-    var configClass: Class<out IConfig>? = null
 
     companion object {
         var configFormatter: IConfigFormatter = object : IConfigFormatter {}
@@ -54,7 +53,7 @@ abstract class TestConfigUtil(private val context: Context,
     }
 
     private fun updateListView() {
-        if (configs.isEmpty() && configClass != null) onGetDatas(RemoteConfig.getConfigs(configClass!!))
+        if (configs.isEmpty()) onGetDatas(createDefaultConfigs())
         listView.adapter = ArrayAdapter(context, itemLayoutId, configs)
     }
 
@@ -62,7 +61,7 @@ abstract class TestConfigUtil(private val context: Context,
         this.configs = configs
         testConfigSetting.datas[configName] = configs
         XPreferences.put(context, testConfigSetting)
-        updateListView()
+        if (configs.isNotEmpty()) updateListView()
     }
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
@@ -92,13 +91,13 @@ abstract class TestConfigUtil(private val context: Context,
     }
 
     private fun createConfigs() {
-        if (configClass != null) {
-            createConfigs(configClass!!) {
+        if (createDefaultConfigs().isNotEmpty()) {
+            createConfigs {
                 if (it.isSuccess) refreshDatas()
                 val tip = if (it.isSuccess) "创建数据成功" else it.error
                 Toast.makeText(context, tip, Toast.LENGTH_LONG).show()
             }
-        } else Toast.makeText(context, "请设置 configClass", Toast.LENGTH_LONG).show()
+        } else Toast.makeText(context, "请设置 RemoteConfig.dynamicServers", Toast.LENGTH_LONG).show()
     }
 
     protected open fun onConfigSelected(config: RemoteConfig) {}
@@ -115,11 +114,15 @@ abstract class TestConfigUtil(private val context: Context,
                 })
     }
 
-    private fun createConfigs(configClass: Class<*>, callback: (LCResponse) -> Unit) {
+    private fun createDefaultConfigs(): List<RemoteConfig> {
+        return RemoteConfig.getConfigs()
+    }
+
+    private fun createConfigs(callback: (LCResponse) -> Unit) {
         val lcId = getLcId()
         val lcKey = getLcKey()
         val request = CreateConfigRequest(context.packageName, configName)
-        request.data = RemoteConfig.getConfigs(configClass)
+        request.data = createDefaultConfigs()
         api.createTestConfigs(lcId, lcKey, request).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : ObserverX<LCResponse>(context) {

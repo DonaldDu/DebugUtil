@@ -23,10 +23,10 @@ class MainActivity : AppCompatActivity() {
         buttonUser.setOnClickListener {
             user.show()
         }
-        val server = object : TestServerUtil(context, api, Config::class.java) {
-
+        DynamicServer.load(this)
+        val server = object : TestServerUtil(context, api) {
             override fun onConfigSelected(config: RemoteConfig) {
-
+                DynamicServer.updateServer(config, this@MainActivity)
             }
         }
         server.initOnViewLongClick(buttonServer)
