@@ -5,3 +5,6 @@ interface IDynamicServer {
     val release: String
     val test: String
 }
+
+interface DynamicServerEnum
+interface XPref

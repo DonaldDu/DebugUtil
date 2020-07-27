@@ -5,7 +5,7 @@ import com.dhy.debugutil.TestConfigUtil
 import com.dhy.xpreference.XPreferences
 import java.io.Serializable
 
-class RemoteConfig : Serializable {
+class RemoteConfig : Serializable, XPref {
     var name = ""
     var values: MutableList<String> = mutableListOf()
     fun add(name: String, value: String) {

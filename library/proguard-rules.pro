@@ -1,3 +1,3 @@
 -keepclassmembers class * implements java.io.Serializable {<fields>;}
--keep class com.dhy.debugutil.data.**
--keepclassmembers class * implements com.dhy.debugutil.data.IConfig{*;}
+-keepclassmembers class * implements com.dhy.debugutil.data.DynamicServerEnum {<fields>;}
+-keep class * implements com.dhy.debugutil.data.XPref
