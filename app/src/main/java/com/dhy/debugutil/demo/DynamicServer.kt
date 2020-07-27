@@ -1,13 +1,13 @@
 package com.dhy.debugutil.demo
 
 import android.content.Context
-import com.dhy.debugutil.data.DynamicServerEnum
+import androidx.annotation.Keep
 import com.dhy.debugutil.data.IDynamicServer
 import com.dhy.debugutil.data.RemoteConfig
 import com.dhy.debugutil.data.getUsingTestServer
 
-
-enum class DynamicServer(private val release: String, private val test: String) : DynamicServerEnum {
+@Keep
+enum class DynamicServer(private val release: String, private val test: String) {
     BASE_URL("http://m.cnzhjk.com", "http://222.212.141.34:8093"),
     YW_URL("http://yw.cnzhjk.com", "http://222.212.141.34:8085/"),
     GPS_PROCESS_URL("http://h5.wwvas.com/#/", "http://apk.wwvas.com:10002/#/"),

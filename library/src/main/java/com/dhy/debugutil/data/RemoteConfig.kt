@@ -1,11 +1,13 @@
 package com.dhy.debugutil.data
 
 import android.content.Context
+import androidx.annotation.Keep
 import com.dhy.debugutil.TestConfigUtil
 import com.dhy.xpreference.XPreferences
 import java.io.Serializable
 
-class RemoteConfig : Serializable, XPref {
+@Keep
+class RemoteConfig : Serializable {
     var name = ""
     var values: MutableList<String> = mutableListOf()
     fun add(name: String, value: String) {
