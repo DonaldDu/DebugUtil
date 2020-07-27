@@ -16,6 +16,11 @@ class RemoteConfig : Serializable {
         return TestConfigUtil.configFormatter.format(this)
     }
 
+    val isEmpty: Boolean
+        get() {
+            return name.isEmpty()
+        }
+
     fun isRelease(): Boolean {
         return name.toLowerCase() == "release"
     }
@@ -36,9 +41,15 @@ class RemoteConfig : Serializable {
         if (context != null) XPreferences.put(context, this)
     }
 
+    fun isValid(): Boolean {
+        val servers = toConfigs().map { it.name }
+        return servers.containsAll(newServers)
+    }
+
     companion object {
         @JvmStatic
         lateinit var dynamicServers: List<IDynamicServer>
+        private val newServers by lazy { dynamicServers.map { it.name } }
 
         @JvmStatic
         val serversMap: MutableMap<String, String> = mutableMapOf()
@@ -63,8 +74,8 @@ class RemoteConfig : Serializable {
 
 fun Context.getUsingTestServer(): RemoteConfig {
     var testServer: RemoteConfig = XPreferences.get(this)
-    if (testServer.name.isEmpty()) {
-        testServer = RemoteConfig.getConfigs().find { it.isRelease() }!!
+    if (testServer.isEmpty || !testServer.isValid()) {
+        testServer = RemoteConfig.getReleaseConfig()
     }
     return testServer
 }

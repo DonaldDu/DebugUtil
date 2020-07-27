@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import com.dhy.debugutil.data.*
 import com.dhy.retrofitrxutil.ObserverX
@@ -16,7 +17,7 @@ abstract class TestConfigUtil(private val context: Context,
                               private val api: TestConfigApi,
                               private val configName: String) : AdapterView.OnItemClickListener {
 
-    private var configs: List<RemoteConfig>
+    private lateinit var configs: List<RemoteConfig>
     private var testConfigSetting: TestConfigSetting = XPreferences.get(context)
     private lateinit var dialog: Dialog
     private lateinit var listView: ListView
@@ -27,11 +28,6 @@ abstract class TestConfigUtil(private val context: Context,
         var configFormatter: IConfigFormatter = object : IConfigFormatter {}
     }
 
-    init {
-        configs = testConfigSetting.datas[configName] ?: emptyList()
-        testConfigSetting.datas[configName] = configs
-    }
-
     fun initOnViewLongClick(view: View) {
         view.setOnLongClickListener {
             show()
@@ -39,7 +35,12 @@ abstract class TestConfigUtil(private val context: Context,
         }
     }
 
+    internal open fun loadData(): List<RemoteConfig> {
+        return testConfigSetting.datas[configName] ?: emptyList()
+    }
+
     fun show() {
+        configs = loadData()
         dialog = Dialog(context)
         listView = ListView(context)
         dialog.setContentView(listView)
@@ -50,6 +51,11 @@ abstract class TestConfigUtil(private val context: Context,
         listView.onItemClickListener = this
         updateListView()
         dialog.show()
+        dialog.window?.apply {
+            val lp = attributes
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT
+            attributes = lp
+        }
     }
 
     private fun updateListView() {

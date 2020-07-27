@@ -14,16 +14,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ObserverX.setDefaultStyledProgressGenerator(MyStyledProgressGenerator())
-        ObserverX.setDefaultErrorHandler(MyNetErrorHandler())
+        ObserverX.setProgressGenerator(MyStyledProgressGenerator())
+        ObserverX.setErrorHandler(MyNetErrorHandler())
         api = ApiHolderUtil(ApiHolder::class).api
         val context = this
+        DynamicServer.load(this)
         val user = TestUserUtil(context, api, null)
         user.initOnViewLongClick(buttonUser)
         buttonUser.setOnClickListener {
             user.show()
         }
-        DynamicServer.load(this)
         val server = object : TestServerUtil(context, api) {
             override fun onConfigSelected(config: RemoteConfig) {
                 DynamicServer.updateServer(config, this@MainActivity)
