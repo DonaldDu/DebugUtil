@@ -23,14 +23,14 @@ class MyStyledProgressGenerator : StyledProgressGenerator {
 
 class DialogProgressStyle(private val context: Context, private val cancelListener: DialogInterface.OnCancelListener) : StyledProgress {
     var dialog: Dialog? = null
+    override fun dismissProgress(delay: Boolean) {
+        dialog?.dismiss()
+    }
+
     override fun showProgress() {
         if (dialog == null) {
             dialog = ProgressDialog.show(context, "", "")
             dialog!!.setOnCancelListener(cancelListener)
         } else dialog!!.show()
-    }
-
-    override fun dismissProgress() {
-        dialog?.dismiss()
     }
 }

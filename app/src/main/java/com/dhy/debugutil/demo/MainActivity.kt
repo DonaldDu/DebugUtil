@@ -1,7 +1,7 @@
 package com.dhy.debugutil.demo
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.dhy.apiholder.ApiHolderUtil
 import com.dhy.debugutil.TestServerUtil
 import com.dhy.debugutil.TestUserUtil
