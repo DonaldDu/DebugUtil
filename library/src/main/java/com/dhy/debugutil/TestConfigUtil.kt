@@ -60,7 +60,13 @@ abstract class TestConfigUtil(private val context: Context,
 
     private fun updateListView() {
         if (configs.isEmpty()) onGetDatas(createDefaultConfigs())
-        listView.adapter = ArrayAdapter(context, itemLayoutId, configs)
+        listView.adapter = object : ArrayAdapter<RemoteConfig>(context, itemLayoutId, configs) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.textSize = 12f
+                return view
+            }
+        }
     }
 
     private fun onGetDatas(configs: List<RemoteConfig>) {
