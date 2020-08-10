@@ -5,7 +5,7 @@ import com.dhy.debugutil.data.ConfigResponse
 import com.dhy.debugutil.data.CreateConfigRequest
 import com.dhy.debugutil.data.FetchConfigRequest
 import com.dhy.debugutil.data.LCResponse
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import retrofit2.http.*
 
 @BaseUrl("https://api.leancloud.cn/1.1/")
