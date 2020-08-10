@@ -58,15 +58,26 @@ abstract class TestConfigUtil(private val context: Context,
         }
     }
 
+    protected open fun getConfigFormatter(): IConfigFormatter {
+        return configFormatter
+    }
+
     private fun updateListView() {
-        if (configs.isEmpty()) onGetDatas(createDefaultConfigs())
+        if (configs.isEmpty()) onGetDatas(genDefaultConfigs())
+        configs.forEach {
+            it.configFormatter = getConfigFormatter()
+        }
         listView.adapter = object : ArrayAdapter<RemoteConfig>(context, itemLayoutId, configs) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
-                view.textSize = 12f
+                setUpConfigItemView(view)
                 return view
             }
         }
+    }
+
+    protected open fun setUpConfigItemView(tv: TextView) {
+        tv.textSize = 12f
     }
 
     private fun onGetDatas(configs: List<RemoteConfig>) {
@@ -97,14 +108,14 @@ abstract class TestConfigUtil(private val context: Context,
                     .setMessage("获取${msg}数据失败")
                     .setNegativeButton("关闭", null)
                     .setPositiveButton("创建默认数据") { _, _ ->
-                        createConfigs()
+                        createDefaultConfigs()
                     }.show()
         }
     }
 
-    private fun createConfigs() {
-        if (createDefaultConfigs().isNotEmpty()) {
-            createConfigs {
+    private fun createDefaultConfigs() {
+        if (genDefaultConfigs().isNotEmpty()) {
+            createDefaultConfigs {
                 if (it.isSuccess) refreshDatas()
                 val tip = if (it.isSuccess) "创建数据成功" else it.error
                 Toast.makeText(context, tip, Toast.LENGTH_LONG).show()
@@ -126,15 +137,13 @@ abstract class TestConfigUtil(private val context: Context,
                 })
     }
 
-    private fun createDefaultConfigs(): List<RemoteConfig> {
-        return RemoteConfig.getConfigs()
-    }
+    protected abstract fun genDefaultConfigs(): List<RemoteConfig>
 
-    private fun createConfigs(callback: (LCResponse) -> Unit) {
+    private fun createDefaultConfigs(callback: (LCResponse) -> Unit) {
         val lcId = getLcId()
         val lcKey = getLcKey()
         val request = CreateConfigRequest(context.packageName, configName)
-        request.data = createDefaultConfigs()
+        request.data = genDefaultConfigs()
         api.createTestConfigs(lcId, lcKey, request).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : ObserverX<LCResponse>(context) {

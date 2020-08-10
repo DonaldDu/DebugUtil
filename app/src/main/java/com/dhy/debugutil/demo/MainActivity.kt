@@ -1,6 +1,7 @@
 package com.dhy.debugutil.demo
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.dhy.apiholder.ApiHolderUtil
 import com.dhy.debugutil.TestServerUtil
@@ -20,7 +21,11 @@ class MainActivity : AppCompatActivity() {
         api = ApiHolderUtil(ApiHolder::class).api
         val context = this
         DynamicServer.load(this)
-        val user = TestUserUtil(context, api, null)
+        val user = object : TestUserUtil(context, api, null) {
+            override fun onConfigSelected(config: RemoteConfig) {
+                Toast.makeText(this@MainActivity, "用户名：${config.name}，密码：${config.values.firstOrNull()}", Toast.LENGTH_SHORT).show()
+            }
+        }
         user.initOnViewLongClick(buttonUser)
         buttonUser.setOnClickListener {
             user.show()
@@ -33,6 +38,10 @@ class MainActivity : AppCompatActivity() {
         server.initOnViewLongClick(buttonServer)
         buttonServer.setOnClickListener {
             server.show()
+        }
+        btClearData.setOnClickListener {
+            Runtime.getRuntime().exec("pm clear $packageName")
+            Toast.makeText(this, "cleared", Toast.LENGTH_SHORT).show()
         }
     }
 }

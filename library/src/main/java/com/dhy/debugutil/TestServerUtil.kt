@@ -11,6 +11,10 @@ open class TestServerUtil(context: Context, api: TestConfigApi) : TestConfigUtil
         return super.loadData().filter { it.isValid() }
     }
 
+    override fun genDefaultConfigs(): List<RemoteConfig> {
+        return RemoteConfig.getConfigs()
+    }
+
     companion object {
         @JvmStatic
         fun updateServerLabel(serverLabel: TextView, usingTestServer: RemoteConfig) {

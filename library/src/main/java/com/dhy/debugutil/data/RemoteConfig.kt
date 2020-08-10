@@ -2,6 +2,7 @@ package com.dhy.debugutil.data
 
 import android.content.Context
 import androidx.annotation.Keep
+import com.dhy.debugutil.IConfigFormatter
 import com.dhy.debugutil.TestConfigUtil
 import com.dhy.xpreference.XPreferences
 import java.io.Serializable
@@ -14,8 +15,11 @@ class RemoteConfig : Serializable {
         values.add("$name@$value")
     }
 
+    @Transient
+    var configFormatter: IConfigFormatter? = null
     override fun toString(): String {
-        return TestConfigUtil.configFormatter.format(this)
+        val formater = configFormatter ?: TestConfigUtil.configFormatter
+        return formater.format(this)
     }
 
     val isEmpty: Boolean

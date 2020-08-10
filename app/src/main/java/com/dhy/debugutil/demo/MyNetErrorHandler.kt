@@ -22,7 +22,7 @@ class MyNetErrorHandler : BaseErrorHandler() {
     }
 
     override fun isAuthorizeFailed(activity: Activity, error: IError): Boolean {
-        return false
+        return INVALID_TOKEN.contains(error.code)
     }
 
     override fun onLogout(context: Context) {
@@ -59,12 +59,12 @@ class MyNetErrorHandler : BaseErrorHandler() {
 
         if (TextUtils.isEmpty(message)) {
             message = SERVER_ERROR
-            Log.d("ErrorHandler", json)
+            Log.d("ErrorHandler", json!!)
         }
         return Error(code, message, e.code())
     }
 
-    class Error(private val errorCode: Int, val msg: String, private val httpCode: Int = 0) : IError {
+    class Error(private val errorCode: Int, private val msg: String, private val httpCode: Int = 0) : IError {
         override fun httpCode() = httpCode
 
         override fun getMessage(): String {

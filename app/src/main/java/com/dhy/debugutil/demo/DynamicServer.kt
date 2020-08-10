@@ -6,7 +6,6 @@ import com.dhy.debugutil.data.IDynamicServer
 import com.dhy.debugutil.data.RemoteConfig
 import com.dhy.debugutil.data.getUsingTestServer
 
-@Keep
 enum class DynamicServer(private val release: String, private val test: String) {
     BASE_URL("http://www.abc1.com", "http://192.168.141.34:8093"),
     YW_URL("http://www.abc2.com", "http://192.168.141.34:8085/");
