@@ -17,7 +17,7 @@ interface YWApi {
 }
 
 class ApiUtil : ApiHolderUtil<ApiHolder>(ApiHolder::class) {
-    override fun getEnumBaseUrl(cls: Class<*>): BaseUrlData {
+    override fun getUserBaseUrl(cls: Class<*>): BaseUrlData {
         val baseUrl = cls.getAnnotation(BaseUrl::class.java)
         return if (baseUrl != null) BaseUrlData(baseUrl.value.toString(), baseUrl.append, baseUrl.rootApi)
         else {

@@ -10,8 +10,8 @@ import android.widget.*
 import com.dhy.debugutil.data.*
 import com.dhy.retrofitrxutil.ObserverX
 import com.dhy.xpreference.XPreferences
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 abstract class TestConfigUtil(private val context: Context,
                               private val api: TestConfigApi,
