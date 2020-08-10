@@ -7,6 +7,7 @@ import com.dhy.debugutil.TestServerUtil
 import com.dhy.debugutil.TestUserUtil
 import com.dhy.debugutil.data.RemoteConfig
 import com.dhy.retrofitrxutil.ObserverX
+import com.dhy.retrofitrxutil.sample.SampleStyledProgressGenerator
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -14,7 +15,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ObserverX.setProgressGenerator(MyStyledProgressGenerator())
+        ObserverX.setProgressGenerator(SampleStyledProgressGenerator())
         ObserverX.setErrorHandler(MyNetErrorHandler())
         api = ApiHolderUtil(ApiHolder::class).api
         val context = this

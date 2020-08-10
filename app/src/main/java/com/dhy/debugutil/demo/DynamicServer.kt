@@ -8,11 +8,8 @@ import com.dhy.debugutil.data.getUsingTestServer
 
 @Keep
 enum class DynamicServer(private val release: String, private val test: String) {
-    BASE_URL("http://m.cnzhjk.com", "http://222.212.141.34:8093"),
-    YW_URL("http://yw.cnzhjk.com", "http://222.212.141.34:8085/"),
-    GPS_PROCESS_URL("http://h5.wwvas.com/#/", "http://apk.wwvas.com:10002/#/"),
-    ANETU_SHARE_URL("http://h5.wwvas.com", "http://wxbind.wwvas.com"),
-    CRM_URL("http://crm.cnzhjk.com:8083", "http://192.168.0.92:8845");
+    BASE_URL("http://www.abc1.com", "http://192.168.141.34:8093"),
+    YW_URL("http://www.abc2.com", "http://192.168.141.34:8085/");
 
     override fun toString(): String {
         return RemoteConfig.serversMap[name] ?: release
